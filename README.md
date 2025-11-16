@@ -44,3 +44,6 @@ Desarrollado para DELAOSTIA - La Rioja, España
 ## Licencia
 
 MIT
+
+
+✨ Deployed on Vercel - Ready to use!
