@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luna - Sistema de Reservas</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* LOGIN */
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 450px;
+            padding: 3rem;
+            background: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #f472b6;
+            font-weight: 700;
+        }
+
+        .login-question {
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #f472b6;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #f472b6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #ec4899;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .alert-error {
+            background: #7f1d1d;
+            color: #fca5a5;
+            border: 1px solid #b91c1c;
+        }
+
+        .alert-success {
+            background: #1b4332;
+            color: #95d5b2;
+            border: 1px solid #22c55e;
+        }
+
+        /* APP */
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .app-header {
+            padding: 1.5rem;
+            background: #1e293b;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            color: #f472b6;
+            font-weight: 700;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            background: #334155;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #475569;
+        }
+
+        .content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .reservations {
+            flex: 1;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .reservation-item {
+            padding: 1rem;
+            background: #0f172a;
+            border-left: 3px solid #64748b;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reservation-item:hover {
+            background: #1e293b;
+            border-left-color: #f472b6;
+        }
+
+        .reservation-item.pending {
+            border-left-color: #eab308;
+        }
+
+        .reservation-item.seated {
+            border-left-color: #3b82f6;
+        }
+
+        .reservation-item.completed {
+            border-left-color: #22c55e;
+        }
+
+        .res-time {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+
+        .res-name {
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 0.25rem;
+        }
+
+        .res-details {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .btn-secondary {
+            padding: 0.5rem 1rem;
+            background: #334155;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 0.75rem;
+            transition: background 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="login-container">
+        <div class="login-card">
+            <div class="logo">🍽️ LUNA</div>
+            <form id="login-form">
+                <p class="login-question">¿Quién es la mejor camarera del local?</p>
+                <input type="text" id="login-answer" placeholder="Escribe la respuesta..." autocomplete="off" required>
+                <button type="submit" class="btn-primary">ACCEDER</button>
+                <div id="login-error" class="alert alert-error hidden"></div>
+                <div id="login-success" class="alert alert-success hidden">✓ ¡Acceso permitido!</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app" class="app-container hidden">
+        <header class="app-header">
+            <div class="app-title">Luna - Reservas</div>
+            <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+        </header>
+        
+        <div class="content">
+            <div class="sidebar">
+                <h3>Acciones</h3>
+                <button class="btn-secondary" onclick="showNewReservation()">+ Nueva Reserva</button>
+            </div>
+            <div class="reservations" id="reservations-list">
+                <h3>Reservas de hoy</h3>
+                <p style="color: #94a3b8; margin-top: 1rem;">No hay reservas programadas</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CORRECT_ANSWER = 'Luna'.toLowerCase();
+        const STORAGE_KEY = 'luna_authenticated';
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const answer = document.getElementById('login-answer').value.toLowerCase().trim();
+            
+            if (answer === CORRECT_ANSWER) {
+                document.getElementById('login-success').classList.remove('hidden');
+                localStorage.setItem(STORAGE_KEY, 'true');
+                setTimeout(() => {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('main-app').classList.remove('hidden');
+                }, 500);
+            } else {
+                const errorEl = document.getElementById('login-error');
+                errorEl.textContent = '❌ Respuesta incorrecta. Intenta de nuevo.';
+                errorEl.classList.remove('hidden');
+                document.getElementById('login-answer').value = '';
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem(STORAGE_KEY);
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-form').reset();
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('login-success').classList.add('hidden');
+        }
+
+        function showNewReservation() {
+            alert('Función de nueva reserva - próximamente');
+        }
+
+        // Check if already authenticated
+        window.addEventListener('load', function() {
+            if (localStorage.getItem(STORAGE_KEY) === 'true') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
